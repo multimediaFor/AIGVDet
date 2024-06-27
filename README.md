@@ -15,7 +15,7 @@ The code and dataset is released only for academic research. Commercial usage is
 ## Citation
  ```
 @article{IGVDet24,
-author = {Man Lin and Gang Cao and Zijie Lou and Chi Zhang},
+author = {Jianfa Bai and Man Lin and Gang Cao and Zijie Lou},
 title = {{Spatio-temporal co-attention fusion network for video splicing localization}},
 conference = {The 7th Chinese Conference on Pattern Recognition and Computer Vision (PRCV)},
 year = {2024},
