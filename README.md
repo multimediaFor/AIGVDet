@@ -1,4 +1,28 @@
 # AIGVDet
-An official implementation code for paper "[AI-Generated Video Detection via Spatial-Temporal Anomaly Learning](https://arxiv.org/abs/2403.16638)", PRCV 2024. This repo provide codes and trained weights.
-# Abstract
-The artificial intelligence (AI)-generated videos become more and more realistic with the advancement of generation models. Such synthetic videos are indistinguishable from the real ones by human eyes, and may be easily created by malicious users to spread false information. To prevent the misuse, we propose an effective AI-Generated Video Detection (AIGVDet) scheme with spatial-temporal convolutional neural network (CNN) and decision fusion strategy. Specifically, two separate ResNet detectors are learned for identifying the anomalies in spatial and optical flow domains, respectively. To enhance the discrimination ability of AIGVDet, the frame-level prediction results of such two detectors are aggregated to the final video detection result based on multiple stages decision fusion. A new large-scale generated video dataset (GVD) is created as a benchmark for network training and evaluation. Extensive experimental results verify the high generalization ability and robustness of our AIGVDet scheme in detecting AI-generated videos blindly. Source code is available at https://github.com/multimediaFor/AIGVDet.
+An official implementation code for paper "[AI-Generated Video Detection via Spatial-Temporal Anomaly Learning](https://arxiv.org/abs/2403.16638)", PRCV 2024. This repo will provide <B>codes, trained weights, and our training datasets</B>. 
+
+## Network Architecture
+
+ 
+## Usage of SCFNet
+1.  
+2.  
+3.  
+
+## License 
+The code and dataset is released only for academic research. Commercial usage is strictly prohibited.
+
+## Citation
+ ```
+@article{IGVDet24,
+author = {Man Lin and Gang Cao and Zijie Lou and Chi Zhang},
+title = {{Spatio-temporal co-attention fusion network for video splicing localization}},
+conference = {The 7th Chinese Conference on Pattern Recognition and Computer Vision (PRCV)},
+year = {2024},
+}
+```
+
+## Contact
+If you have any questions, please contact me(lyan924@cuc.edu.cn).
+
+
