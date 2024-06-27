@@ -14,9 +14,9 @@ The code and dataset is released only for academic research. Commercial usage is
 
 ## Citation
  ```
-@article{IGVDet24,
+@article{AIGVDet24,
 author = {Jianfa Bai and Man Lin and Gang Cao and Zijie Lou},
-title = {{Spatio-temporal co-attention fusion network for video splicing localization}},
+title = {{AI-generated video detection via spatial-temporal anomaly learning}},
 conference = {The 7th Chinese Conference on Pattern Recognition and Computer Vision (PRCV)},
 year = {2024},}
 ```
