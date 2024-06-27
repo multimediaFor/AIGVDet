@@ -1,4 +1,4 @@
-# AIGVDet
+## AIGVDet
 An official implementation code for paper "[AI-Generated Video Detection via Spatial-Temporal Anomaly Learning](https://arxiv.org/abs/2403.16638)", PRCV 2024. This repo will provide <B>codes, trained weights, and our training datasets</B>. 
 
 ## Network Architecture
