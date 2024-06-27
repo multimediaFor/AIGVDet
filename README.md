@@ -18,8 +18,7 @@ The code and dataset is released only for academic research. Commercial usage is
 author = {Jianfa Bai and Man Lin and Gang Cao and Zijie Lou},
 title = {{Spatio-temporal co-attention fusion network for video splicing localization}},
 conference = {The 7th Chinese Conference on Pattern Recognition and Computer Vision (PRCV)},
-year = {2024},
-}
+year = {2024},}
 ```
 
 ## Contact
