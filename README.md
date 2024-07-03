@@ -4,7 +4,7 @@ An official implementation code for paper "[AI-Generated Video Detection via Spa
 ## Network Architecture
 
  
-## Usage of SCFNet
+## Usage
 1.  
 2.  
 3.  
