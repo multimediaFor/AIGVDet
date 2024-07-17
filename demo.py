@@ -52,11 +52,9 @@ def viz(img, flo, folder_optical_flow_path, imfile1):
 
 
 def video_to_frames(video_path, output_folder):
-    # 创建输出文件夹（如果不存在）
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     
-    # 打开视频文件
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
     
@@ -65,14 +63,12 @@ def video_to_frames(video_path, output_folder):
         if not ret:
             break
         
-        # 为每一帧生成文件名
         frame_filename = os.path.join(output_folder, f"frame_{frame_count:05d}.png")
         cv2.imwrite(frame_filename, frame)
         frame_count += 1
     
     cap.release()
 
-    # 获取所有帧的路径
     images = glob.glob(os.path.join(output_folder, '*.png')) + \
              glob.glob(os.path.join(output_folder, '*.jpg'))
     images = sorted(images)
