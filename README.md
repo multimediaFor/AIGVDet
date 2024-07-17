@@ -5,17 +5,58 @@ An official implementation code for paper "[AI-Generated Video Detection via Spa
 <center> <img src="fig/NetworkArchitecture.png" alt="architecture"/> </center>
  
 ## Training
-- Prepare for the training dataset.
+- Prepare for the training datasets.
+```
+└─data
+   ├── train
+   │   └── trainset_1
+   │       ├── 0_real
+   │       │   ├── video_00000
+   │       │   │    ├── 00000.png
+   │       │   │    └── ...
+   │       │   └── ...
+   │       └── 1_fake
+   │           ├── video_00000
+   │           │    ├── 00000.png
+   │           │    └── ...
+   │           └── ...
+   ├── val
+   │   └── val_set_1
+   │       ├── 0_real
+   │       │   ├── video_00000
+   │       │   │    ├── 00000.png
+   │       │   │    └── ...
+   │       │   └── ...
+   │       └── 1_fake
+   │           ├── video_00000
+   │           │    ├── 00000.png
+   │           │    └── ...
+   │           └── ...
+   └── test
+       └── testset_1
+           ├── 0_real
+           │   ├── video_00000
+           │   │    ├── 00000.png
+           │   │    └── ...
+           │   └── ...
+           └── 1_fake
+               ├── video_00000
+               │    ├── 00000.png
+               │    └── ...
+               └── ...
+
+```
+- Modify configuration file in `core/utils1/config.py`.
 - Train the Spatial Domain Detector with the RGB frames.
 ```bash
-python train.py --gpus 0 --exp_name TRAIN_RGB_BRANCH datasets PATH_TO_RGB_TRAINSET datasets_test PATH_TO_RGB_TESTSET
+python train.py --gpus 0 --exp_name TRAIN_RGB_BRANCH datasets RGB_TRAINSET datasets_test RGB_TESTSET
 ```
 - Train the Optical Flow Detector with the optical flow frames.
 ```bash
-python train.py --gpus 0 --exp_name TRAIN_OF_BRANCH datasets PATH_TO_OF_TRAINSET datasets_test PATH_TO_OF_TESTSET
+python train.py --gpus 0 --exp_name TRAIN_OF_BRANCH datasets OpticalFlow_TRAINSET datasets_test OpticalFlow_TESTSET
 ```
 ## Testing
-Download the weights from [Google Drive Link]()and move it into the `checkpoints/`.
+Download the weights from [Google Drive Link](https://drive.google.com/drive/folders/18JO_YxOEqwJYfbVvy308XjoV-N6fE4yP?usp=share_link)and move it into the `checkpoints/`.
 
 ```bash
 python test.py -fop PATH_TO_OPTICAL_FLOW_FRAMES -mop MODEL_PATH_TO_OPTICAL_FLOW_DETECTOR -for PATH_TO_RGB_FRAMES -mor MODEL_PATH_TO_OPTICAL_FLOW_DETECTOR -e PATH_TO_FRAME_EXCEL -ef PATH_TO_FRAME_DETECTION_RESULT_EXCEL -t THRESHOLD
@@ -35,6 +76,6 @@ year = {2024},}
 ```
 
 ## Contact
-If you have any questions, please contact me(gangcao@cuc.edu.cn).
+If you have any questions, please contact me(jianfa@cuc.edu.cn or lyan924@cuc.edu.cn).
 
 
