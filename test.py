@@ -105,12 +105,12 @@ if __name__=="__main__":
     y_true=[]
     y_pred=[]
 
-    # 创建一个空的DataFrame
+    # create an empty DataFrame
     df = pd.DataFrame(columns=['name', 'pro','flag','optical_pro','original_pro'])
     df1 = pd.DataFrame(columns=['original_path', 'original_pro','optical_path','optical_pro','flag'])
     index1=0
     
-    # 遍历大文件夹中的小文件夹
+    # Traverse through subfolders in a large folder.
     for subfolder_name in ["0_real", "1_fake"]:
         optical_subfolder_path = os.path.join(args.folder_optical_flow_path, subfolder_name)
         original_subfolder_path = os.path.join(args.folder_original_path, subfolder_name)
@@ -123,30 +123,27 @@ if __name__=="__main__":
         if os.path.isdir(optical_subfolder_path):
             pass
         else:
-            print("小文件夹不存在:", optical_subfolder_path)
+            print("Subfolder does not exist.", optical_subfolder_path)
         
-        # 检查小文件夹路径是否存在
+        # Check if the subfolder path exists.
         if os.path.isdir(original_subfolder_path):
             print("test subfolder:", subfolder_name)
 
-            # 遍历小文件夹中的小小文件夹
+            # Traverse through sub-subfolders within a subfolder.
             for subsubfolder_name in os.listdir(original_subfolder_path):
                 original_subsubfolder_path = os.path.join(original_subfolder_path, subsubfolder_name)
                 optical_subsubfolder_path = os.path.join(optical_subfolder_path, subsubfolder_name)
-                # 检查小小文件夹路径是否存在
                 if os.path.isdir(optical_subsubfolder_path):
                     pass
                 else:
-                    print("小小文件夹不存在",optical_subsubfolder_path)
+                    print("Sub-subfolder does not exist.",optical_subsubfolder_path)
                     
-                # 检查小小文件夹路径是否存在
                 if os.path.isdir(original_subsubfolder_path):
                     print("test subsubfolder:", subsubfolder_name)
                     
-                    #检测original 
+                    #Detect original
                     original_file_list = sorted(glob.glob(os.path.join(original_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(original_subsubfolder_path, "*.png"))+glob.glob(os.path.join(original_subsubfolder_path, "*.JPEG")))
-                    # print(f"Testing images from '{args.file}'")
-                    # 在这里可以进一步处理小小文件夹中的图片文件
+
                     original_prob_sum=0
                     for img_path in tqdm(original_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
                         
@@ -168,7 +165,7 @@ if __name__=="__main__":
                     original_predict=original_prob_sum/len(original_file_list)
                     print("original prob",original_predict)
                     
-                    #检测optical flow
+                    #Detect optical flow
                     optical_file_list = sorted(glob.glob(os.path.join(optical_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(optical_subsubfolder_path, "*.png"))+glob.glob(os.path.join(optical_subsubfolder_path, "*.JPEG")))
                     optical_prob_sum=0
                     for img_path in tqdm(optical_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
@@ -208,7 +205,7 @@ if __name__=="__main__":
                             tp+=1
                     df = df.append({'name': subsubfolder_name, 'pro': predict , 'flag':flag ,'optical_pro':optical_predict,'original_pro':original_predict}, ignore_index=True)
         else:
-            print("小文件夹不存在:", original_subfolder_path)
+            print("Subfolder does not exist:", original_subfolder_path)
     # r_acc = accuracy_score(y_true[y_true == 0], y_pred[y_true == 0] > args.threshold)
     # f_acc = accuracy_score(y_true[y_true == 1], y_pred[y_true == 1] > args.threshold)
     # acc = accuracy_score(y_true, y_pred > args.threshold)
@@ -228,10 +225,9 @@ if __name__=="__main__":
     print(f"tp:{tp}")
     print(f"tn:{tn}")
 
-    # 将DataFrame写入Excel文件
+    # Write the DataFrame to a csv file.
     csv_filename = args.excel_path
     csv_folder = os.path.dirname(csv_filename) 
-    # 如果文件夹不存在，创建文件夹 
     if not os.path.exists(csv_folder):
         os.makedirs(csv_folder)
 
@@ -240,12 +236,11 @@ if __name__=="__main__":
         df.to_csv(csv_filename, index=False)
     else:
         df.to_csv(csv_filename, mode='a', header=False, index=False)
-    print(f"结果已保存到 {csv_filename}")
+    print(f"Results have been saved to {csv_filename}")
         
-    # 将frame的预测概率写入csv
+    # Write the prediction probabilities of the frame to a CSV file.
     csv_filename1 = args.excel_frame_path
     csv_folder1 = os.path.dirname(csv_filename1) 
-    # 如果文件夹不存在，创建文件夹 
     if not os.path.exists(csv_folder1):
         os.makedirs(csv_folder1)
 
@@ -260,7 +255,7 @@ if __name__=="__main__":
     # else:
     #     with pd.ExcelWriter(excel_filename, mode='a', engine='openpyxl') as writer:
     #         df.to_excel(writer, sheet_name='Sheet1', index=False, startrow=0, header=False)
-    print(f"结果已保存到 {csv_filename1}")
+    print(f"Results have been saved to {csv_filename1}")
     
 
 
