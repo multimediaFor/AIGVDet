@@ -48,20 +48,24 @@ An official implementation code for paper "[AI-Generated Video Detection via Spa
 ```
 - Modify configuration file in `core/utils1/config.py`.
 - Train the Spatial Domain Detector with the RGB frames.
-```bash
+```
 python train.py --gpus 0 --exp_name TRAIN_RGB_BRANCH datasets RGB_TRAINSET datasets_test RGB_TESTSET
 ```
 - Train the Optical Flow Detector with the optical flow frames.
-```bash
+```
 python train.py --gpus 0 --exp_name TRAIN_OF_BRANCH datasets OpticalFlow_TRAINSET datasets_test OpticalFlow_TESTSET
 ```
 ## Testing
-Download the weights from [Google Drive Link](https://drive.google.com/drive/folders/18JO_YxOEqwJYfbVvy308XjoV-N6fE4yP?usp=share_link)and move it into the `checkpoints/`.
+Download the weights from [Google Drive Link](https://drive.google.com/drive/folders/18JO_YxOEqwJYfbVvy308XjoV-N6fE4yP?usp=share_link) and move it into the `checkpoints/`.
 
-```bash
-python test.py -fop PATH_TO_OPTICAL_FLOW_FRAMES -mop MODEL_PATH_TO_OPTICAL_FLOW_DETECTOR -for PATH_TO_RGB_FRAMES -mor MODEL_PATH_TO_OPTICAL_FLOW_DETECTOR -e PATH_TO_FRAME_EXCEL -ef PATH_TO_FRAME_DETECTION_RESULT_EXCEL -t THRESHOLD
+- Run on a dataset.
 ```
-
+python test.py -fop "data/test/hotshot" -mop "checkpoints/optical_aug.pth" -for "data/test/original/hotshot" -mor "checkpoints/original_aug.pth" -e "data/results/T2V/hotshot.csv" -ef "data/results/frame/T2V/hotshot.csv" -t 0.5
+```
+- Run on a video.
+```
+python demo.py --use_cpu --path "video/000000.mp4" --folder_original_path "frame/000000" --folder_optical_flow_path "optical_result/000000" -mop "checkpoints/optical.pth" -mor "checkpoints/original.pth"
+```
 
 ## License 
 The code and dataset is released only for academic research. Commercial usage is strictly prohibited.
@@ -76,6 +80,6 @@ year = {2024},}
 ```
 
 ## Contact
-If you have any questions, please contact me(jianfa@cuc.edu.cn or lyan924@cuc.edu.cn).
+If you have any questions, please contact us(jianfa@cuc.edu.cn or lyan924@cuc.edu.cn).
 
 
