@@ -3,7 +3,14 @@ An official implementation code for paper "[AI-Generated Video Detection via Spa
 
 ## Network Architecture
 <center> <img src="fig/NetworkArchitecture.png" alt="architecture"/> </center>
- 
+
+## Dataset 
+- Download the preprocessed training frames from
+[Baiduyun Link](https://pan.baidu.com/s/17xmDyFjtcmNsoxmUeImMTQ?pwd=ra95) (extract code: ra95).
+- Download the test videos from [Baiduyun Link](https://pan.baidu.com/s/1cGlvGcCMSsovZiSqao_vTg?pwd=ujs3)(extract code: ujs3).
+
+**You are allowed to use the datasets for <B>research purpose only</B>.**
+
 ## Training
 - Prepare for the training datasets.
 ```
@@ -80,6 +87,6 @@ year = {2024},}
 ```
 
 ## Contact
-If you have any questions, please contact us(jianfa@cuc.edu.cn or lyan924@cuc.edu.cn).
+If you have any questions, please contact us(lyan924@cuc.edu.cn).
 
 
