@@ -13,7 +13,7 @@ from PIL import Image, ImageFile
 from scipy.ndimage import gaussian_filter
 from torch.utils.data.sampler import WeightedRandomSampler
 
-from utils.config import CONFIGCLASS
+from utils1.config import CONFIGCLASS
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 

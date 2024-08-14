@@ -6,8 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from utils.config import CONFIGCLASS
-from utils.utils import to_cuda
+from utils1.config import CONFIGCLASS
+from utils1.utils import to_cuda
 
 
 def get_val_cfg(cfg: CONFIGCLASS, split="val", copy=True):

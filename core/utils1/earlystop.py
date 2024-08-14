@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils.trainer import Trainer
+from utils1.trainer import Trainer
 
 
 class EarlyStopping:
