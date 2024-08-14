@@ -37,7 +37,7 @@ def get_val_cfg(cfg: CONFIGCLASS, split="val", copy=True):
 def validate(model: nn.Module, cfg: CONFIGCLASS):
     from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 
-    from utils.datasets import create_dataloader
+    from utils1.datasets import create_dataloader
 
     data_loader = create_dataloader(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
