@@ -20,7 +20,7 @@ class BaseModel(nn.Module):
         self.model:nn.Module
         self.model=nn.Module.to(self.device)
         # self.model.to(self.device)
-        self.model.load_state_dict(torch.load('./checkpoints/optical.pth'))
+        #self.model.load_state_dict(torch.load('./checkpoints/optical.pth'))
         self.optimizer: torch.optim.Optimizer
 
     def save_networks(self, epoch: int):
@@ -131,12 +131,6 @@ class Trainer(BaseModel):
             self.load_networks(cfg.epoch)
         self.model.to(self.device)
 
-        # self.model.load_state_dict(torch.load('checkpoints/optical.pth'))
-        load_path='checkpoints/optical.pth'
-        state_dict = torch.load(load_path, map_location=self.device)
-
-
-        self.model.load_state_dict(state_dict["model"])
         
 
     def adjust_learning_rate(self, min_lr=1e-6):
