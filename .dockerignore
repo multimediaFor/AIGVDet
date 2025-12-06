@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Data and models (too large)
+data/
+checkpoints/*.pth
+raft_model/*.pth
+
+# Logs
+*.log
+logs/
+*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# UV
+.uv/
+
+# Backup files
+*.backup
+requirements.txt.backup
+
+# Documentation
+MIGRATION_SUMMARY.md
+
+# Demo videos (optional - comment out if needed)
+demo_video/

@@ -6,8 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from utils1.config import CONFIGCLASS
-from utils1.utils import to_cuda
+from core.utils1.config import CONFIGCLASS
+from core.utils1.utils import to_cuda
 
 
 def get_val_cfg(cfg: CONFIGCLASS, split="val", copy=True):
@@ -37,7 +37,7 @@ def get_val_cfg(cfg: CONFIGCLASS, split="val", copy=True):
 def validate(model: nn.Module, cfg: CONFIGCLASS):
     from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 
-    from utils1.datasets import create_dataloader
+    from core.utils1.datasets import create_dataloader
 
     data_loader = create_dataloader(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -57,10 +57,21 @@ def validate(model: nn.Module, cfg: CONFIGCLASS):
     f_acc = accuracy_score(y_true[y_true == 1], y_pred[y_true == 1] > 0.5)
     acc = accuracy_score(y_true, y_pred > 0.5)
     ap = average_precision_score(y_true, y_pred)
+    auc = roc_auc_score(y_true, y_pred)
+    
+    # Calculate TPR (True Positive Rate / Recall) and TNR (True Negative Rate / Specificity)
+    tpr = f_acc  # TPR is the accuracy on fake samples (class 1)
+    tnr = r_acc  # TNR is the accuracy on real samples (class 0)
+    
+
+    # added values for results - wandb integration
     results = {
         "ACC": acc,
         "AP": ap,
-        "R_ACC": r_acc,
+        "AUC": auc,
+        "R_ACC": r_acc, 
         "F_ACC": f_acc,
+        "TPR": tpr, # True Positive Rate / Recall
+        "TNR": tnr, # True Negative Rate / Specificity
     }
     return results

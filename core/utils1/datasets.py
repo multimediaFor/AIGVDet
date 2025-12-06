@@ -13,7 +13,7 @@ from PIL import Image, ImageFile
 from scipy.ndimage import gaussian_filter
 from torch.utils.data.sampler import WeightedRandomSampler
 
-from utils1.config import CONFIGCLASS
+from core.utils1.config import CONFIGCLASS
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -27,37 +27,46 @@ def dataset_folder(root: str, cfg: CONFIGCLASS):
 
 
 def binary_dataset(root: str, cfg: CONFIGCLASS):
-    identity_transform = transforms.Lambda(lambda img: img)
-    
-    rz_func = identity_transform
-    
-    if cfg.isTrain:
-        crop_func = transforms.RandomCrop((448,448))
-    else:
-        crop_func = transforms.CenterCrop((448,448)) if cfg.aug_crop else identity_transform
+    # identity_transform = transforms.Lambda(lambda img: img) 
+    # rz_func = identity_transform
+    # issue here, destroys performance as no resizing happens at all that go straight to cropping even if they are different resolutions
 
+    identity_transform = transforms.Lambda(lambda img: img)
+
+    # Enable resize (paper implies resize > crop for random cropping)
+    if cfg.aug_resize:
+        rz_func = transforms.Lambda(lambda img: custom_resize(img, cfg))
+    else:
+        rz_func = identity_transform
+
+    # Crop to cfg.cropSize (paper uses 448)
+    if cfg.isTrain:
+        crop_func = transforms.RandomCrop((cfg.cropSize, cfg.cropSize))
+    else:
+        crop_func = transforms.CenterCrop((cfg.cropSize, cfg.cropSize)) if cfg.aug_crop else identity_transform
+
+    # Flip only in training if enabled (disabled for optical flow)
     if cfg.isTrain and cfg.aug_flip:
         flip_func = transforms.RandomHorizontalFlip()
     else:
-        flip_func = identity_transform
-    
+        flip_func = identity_transform  # fallback
+
 
     return datasets.ImageFolder(
         root,
         transforms.Compose(
             [
-                rz_func,
-                #change
-                transforms.Lambda(lambda img: blur_jpg_augment(img, cfg)),
-                crop_func,
-                flip_func,
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                if cfg.aug_norm
-                else identity_transform,
-            ]
+                    rz_func,
+                    transforms.Lambda(lambda img: blur_jpg_augment(img, cfg)), #change 
+                    crop_func,
+                    flip_func,
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                    if cfg.aug_norm
+                    else identity_transform,
+                ]
+            )
         )
-    )
 
 
 class FileNameDataset(datasets.ImageFolder):
@@ -139,10 +148,10 @@ rz_dict = {'bilinear': Image.BILINEAR,
            'bicubic': Image.BICUBIC,
            'lanczos': Image.LANCZOS,
            'nearest': Image.NEAREST}
-def custom_resize(img: Image.Image, cfg: CONFIGCLASS) -> Image.Image:
+
+def custom_resize(img: Image.Image, cfg: CONFIGCLASS) -> Image.Image: # added to implement 70 to 90
     interp = sample_discrete(cfg.rz_interp)
     return TF.resize(img, cfg.loadSize, interpolation=rz_dict[interp])
-
 
 def get_dataset(cfg: CONFIGCLASS):
     dset_lst = []

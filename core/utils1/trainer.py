@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 from torch.nn import init
 
-from utils1.config import CONFIGCLASS
-from utils1.utils import get_network
-from utils1.warmup import GradualWarmupScheduler
+from core.utils1.config import CONFIGCLASS
+from core.utils1.utils import get_network
+from core.utils1.warmup import GradualWarmupScheduler
 
 
 class BaseModel(nn.Module):
@@ -18,9 +18,9 @@ class BaseModel(nn.Module):
         self.save_dir = cfg.ckpt_dir
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.model:nn.Module
-        self.model=nn.Module.to(self.device)
         # self.model.to(self.device)
         #self.model.load_state_dict(torch.load('./checkpoints/optical.pth'))
+        # removed self.model=nnModule.to(self.device) breaks the model assignment
         self.optimizer: torch.optim.Optimizer
 
     def save_networks(self, epoch: int):

@@ -10,48 +10,51 @@ class DefaultConfigs(ABC):
     gpus = [0]
     seed = 3407
     arch = "resnet50"
-    datasets = ["zhaolian_train"]
-    datasets_test = ["adm_res_abs_ddim20s"]
+    datasets = ["trainset_1"]  # Changed from trainset_1 to match test/train structure
+    datasets_test = ["val_set_1"]  # Changed from val_set_1 to match test/val structure
     mode = "binary"
     class_bal = False
-    batch_size = 64
-    loadSize = 256
-    cropSize = 224
+    batch_size = 64 # RTX 3090 24GB can handle original batch size
+    loadSize = 512 # Resizes the image, this is used as it is standard for HIGH RES CNNs and must have margin before cropping
+    cropSize = 448
     epoch = "latest"
-    num_workers = 20
+    num_workers = 16  # Increased for faster data loading on 24GB GPU (choose 8 or 16) - doesnt affect accuracy but only throughput
     serial_batches = False
     isTrain = True
 
-    # data augmentation
+    # data augmentation - to match the paper's augmentation rate (10%), set blur and jpg to 0.5
     rz_interp = ["bilinear"]
-    # blur_prob = 0.0
-    blur_prob = 0.1
+    # blur_prob = 0.1 - resnet50 template
+    blur_prob = 0.1 # optical flow
     blur_sig = [0.5]
-    # jpg_prob = 0.0
-    jpg_prob = 0.1
+    # jpg_prob = 0.1 - resnet50 template
+    jpg_prob = 0.1 # optical flow
+    # P(augmented) = 1-(1-0.5)(1-0.05) = 0.975
     jpg_method = ["cv2"]
-    jpg_qual = [75]
+    jpg_qual = list(range(70, 91))
     gray_prob = 0.0
     aug_resize = True
-    aug_crop = True
-    aug_flip = True
-    aug_norm = True
+    aug_crop = True 
+    aug_flip = True # optical flow
+    aug_norm = True # optical flow
 
     ####### train setting ######
     warmup = False
     # warmup = True
     warmup_epoch = 3
+    # earlystop = True - resnet50 template, training ends only when lr reaches 1e-6 which trainer already supports (Trainer.adjust_learning_rate(min_lr=1e-6))
     earlystop = True
     earlystop_epoch = 5
     optim = "adam"
     new_optim = False
     loss_freq = 400
     save_latest_freq = 2000
-    save_epoch_freq = 20
+    save_epoch_freq = 5
     continue_train = False
     epoch_count = 1
     last_epoch = -1
-    nepoch = 400
+    # nepoch = 100, try
+    nepoch = 50
     beta1 = 0.9
     lr = 0.0001
     init_type = "normal"
@@ -59,7 +62,7 @@ class DefaultConfigs(ABC):
     pretrained = True
 
     # paths information
-    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     dataset_root = os.path.join(root_dir, "data")
     exp_root = os.path.join(root_dir, "data", "exp")
     _exp_name = ""

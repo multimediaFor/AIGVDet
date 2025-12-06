@@ -1,0 +1,68 @@
+# Dockerfile for AIGVDet with CPU support
+FROM python:3.11-slim-bookworm
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_SYSTEM_PYTHON=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libgl1-mesa-glx \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN pip install --no-cache-dir uv
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml ./
+COPY README.md ./
+COPY core/ ./core/
+COPY networks/ ./networks/
+COPY train.py test.py demo.py download_data.py ./
+
+# Create directories for data and checkpoints
+RUN mkdir -p /app/data /app/checkpoints /app/raft_model 
+
+# Install other dependencies first
+RUN uv pip install --system \
+    einops \
+    imageio \
+    ipympl \
+    matplotlib \
+    natsort \
+    "numpy<2.0" \
+    opencv-python \
+    pandas \
+    scikit-learn \
+    tensorboard \
+    tensorboardX \
+    tqdm \
+    "blobfile>=1.0.5" \
+    wandb \
+    python-dotenv
+
+# Install PyTorch CPU version using pip directly
+RUN pip3 install torch==2.0.0+cpu torchvision==0.15.1+cpu \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Expose tensorboard port
+EXPOSE 6006
+
+# Default command
+CMD ["python", "train.py", "--help"]

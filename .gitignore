@@ -1,0 +1,209 @@
+# Data directories (large datasets - should not be in repo)
+data/
+checkpoints/
+raft_model/
+
+# Environment variables (contains secrets)
+.env
+.env.example
+
+# Generated output folders
+frame/
+optical_result/
+results/
+logs/
+outputs/
+runs/
+
+# Demo video output
+demo_video/fake_sora/*.mp4
+demo_video/real/*.mp4
+# Keep the demo_video folder structure but ignore large video files
+!demo_video/fake_sora/.gitkeep
+!demo_video/real/.gitkeep
+
+# Model files and weights
+*.pth
+*.pt
+*.pkl
+*.ckpt
+*.h5
+*.hdf5
+*.pb
+*.onnx
+
+# Dataset files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.m4v
+
+# Image files (keep small docs images)
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff
+*.tif
+*.gif
+# Allow images in specific documentation folders
+!fig/**/*.png
+!fig/**/*.jpg
+!fig/**/*.jpeg
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# PyCharm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Windows
+*.lnk
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.backup
+*.swp
+*.cache
+
+# CUDA compilation cache
+.nv_cache/
+*.o
+
+# Experiment tracking
+wandb/
+tensorboard_logs/
+tb_logs/
+mlruns/
+
+# Large binary files
+*.bin
+*.dat
+*.raw
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.tox/
+nosetests.xml
+
+# Translations
+*.mo
+*.pot
+
+# Documentation builds
+docs/_build/
+docs/build/
+_build/
+.readthedocs.yml
+
+# Docker volumes
+.volumes/
+
+# Temporary extraction directories
+temp/
+tmp/
+
+# Configuration files with sensitive data
+config.json
+secrets.json
+.secrets
+credentials.json
+
+# Local development files
+.local/
+local_config.py
+dev_config.py

@@ -4,7 +4,6 @@ einops
 imageio
 ipympl
 matplotlib
-natsort
 numpy
 opencv-python
 pandas
@@ -13,5 +12,3 @@ tensorboard
 tensorboardX
 tqdm
 blobfile>=1.0.5
-wandb
-python-dotenv

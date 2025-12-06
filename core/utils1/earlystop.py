@@ -1,6 +1,7 @@
 import numpy as np
+import wandb
 
-from utils1.trainer import Trainer
+from core.utils1.trainer import Trainer
 
 
 class EarlyStopping:
@@ -41,6 +42,6 @@ class EarlyStopping:
     def save_checkpoint(self, score: float, trainer: Trainer):
         """Saves model when validation loss decrease."""
         if self.verbose:
-            print(f"Validation accuracy increased ({self.score_max:.6f} --> {score:.6f}).  Saving model ...")
-        trainer.save_networks("best")
-        self.score_max = score
+            print(f"Validation accuracy increased ({self.score_max:.6f} --> {score:.6f}).")
+        # trainer.save_networks("best") - Handled globally in train.py to avoid overwriting with local bests
+        self.score_max = score  

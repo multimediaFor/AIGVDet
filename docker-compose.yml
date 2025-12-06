@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # GPU service
+  aigvdet-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu-alt
+    image: sacdalance/thesis-aigvdet:gpu
+    container_name: aigvdet-gpu
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - WANDB=${WANDB}
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./checkpoints:/app/checkpoints
+      - ./raft_model:/app/raft_model
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    ports:
+      - "6006:6006"
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: python train.py --gpus 0 --exp_name default_exp
+    
+  # CPU service
+  aigvdet-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: sacdalance/thesis-aigvdet:cpu
+    container_name: aigvdet-cpu
+    environment:
+      - WANDB=${WANDB}
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./checkpoints:/app/checkpoints
+      - ./raft_model:/app/raft_model
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    ports:
+      - "6007:6006"
+    shm_size: '4gb'
+    command: python train.py --exp_name default_exp

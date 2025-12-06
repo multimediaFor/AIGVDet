@@ -18,7 +18,7 @@ from raft import RAFT
 from utils import flow_viz
 from utils.utils import InputPadder
 from natsort import natsorted
-from utils1.utils import get_network, str2bool, to_cuda
+from core.utils1.utils import get_network, str2bool, to_cuda
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score,roc_auc_score
 
 
@@ -44,9 +44,9 @@ def viz(img, flo, folder_optical_flow_path, imfile1):
 
 
     # print(folder_optical_flow_path)
-    parts=imfile1.rsplit('\\',1)
-    content=parts[1]
-    folder_optical_flow_path=folder_optical_flow_path+'/'+content.strip()
+    # Use os.path.basename to get filename (works on both Windows and Linux)
+    content = os.path.basename(imfile1)
+    folder_optical_flow_path = os.path.join(folder_optical_flow_path, content)
     print(folder_optical_flow_path)
     cv2.imwrite(folder_optical_flow_path, flo)
 
@@ -55,19 +55,24 @@ def video_to_frames(video_path, output_folder):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     
+    print(f"Extracting frames from video: {video_path}")
     cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_count = 0
     
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        
-        frame_filename = os.path.join(output_folder, f"frame_{frame_count:05d}.png")
-        cv2.imwrite(frame_filename, frame)
-        frame_count += 1
+    with tqdm(total=total_frames, desc="Extracting frames", unit="frame") as pbar:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            frame_filename = os.path.join(output_folder, f"frame_{frame_count:05d}.png")
+            cv2.imwrite(frame_filename, frame)
+            frame_count += 1
+            pbar.update(1)
     
     cap.release()
+    print(f"✓ Extracted {frame_count} frames")
 
     images = glob.glob(os.path.join(output_folder, '*.png')) + \
              glob.glob(os.path.join(output_folder, '*.jpg'))
@@ -78,12 +83,14 @@ def video_to_frames(video_path, output_folder):
 
 # generate optical flow images
 def OF_gen(args):
+    print("Loading RAFT model...")
     model = torch.nn.DataParallel(RAFT(args))
     model.load_state_dict(torch.load(args.model, map_location=torch.device(DEVICE)))
 
     model = model.module
     model.to(DEVICE)
     model.eval()
+    print("✓ RAFT model loaded")
 
     if not os.path.exists(args.folder_optical_flow_path):
         os.makedirs(args.folder_optical_flow_path)
@@ -94,7 +101,8 @@ def OF_gen(args):
         images = video_to_frames(args.path, args.folder_original_path)
         images = natsorted(images)
 
-        for imfile1, imfile2 in zip(images[:-1], images[1:]):
+        print("Generating optical flow...")
+        for imfile1, imfile2 in tqdm(zip(images[:-1], images[1:]), total=len(images)-1, desc="Processing optical flow", unit="frame"):
             image1 = load_image(imfile1)
             image2 = load_image(imfile2)
 
@@ -104,6 +112,8 @@ def OF_gen(args):
             flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
 
             viz(image1, flow_up,args.folder_optical_flow_path,imfile1)
+        
+        print("✓ Optical flow generation complete")
 
 
 if __name__ == '__main__':
@@ -138,8 +148,16 @@ if __name__ == '__main__':
     parser.add_argument("--aug_norm", type=str2bool, default=True)
     args = parser.parse_args()
 
+    print("=" * 60)
+    print("AIGVDet - AI-Generated Video Detection")
+    print("=" * 60)
+    print(f"Input video: {args.path}")
+    print(f"Using device: {'GPU' if not args.use_cpu else 'CPU'}")
+    print("=" * 60)
+
     OF_gen(args)
 
+    print("\nLoading detection models...")
     model_op = get_network(args.arch)
     state_dict = torch.load(args.model_optical_flow_path, map_location="cpu")
     if "model" in state_dict:
@@ -148,6 +166,7 @@ if __name__ == '__main__':
     model_op.eval()
     if not args.use_cpu:
         model_op.cuda()
+    print("✓ Optical flow model loaded")
 
     model_or = get_network(args.arch)
     state_dict = torch.load(args.model_original_path, map_location="cpu")
@@ -157,6 +176,7 @@ if __name__ == '__main__':
     model_or.eval()
     if not args.use_cpu:
         model_or.cuda()
+    print("✓ RGB frame model loaded")
 
 
     trans = transforms.Compose(
@@ -166,7 +186,9 @@ if __name__ == '__main__':
         )
     )
 
-    print("*" * 30)
+    print("\n" + "=" * 60)
+    print("Running detection...")
+    print("=" * 60)
 
     # optical_subfolder_path = args.folder_optical_flow_path
     # original_subfolder_path = args.folder_original_path
@@ -176,9 +198,10 @@ if __name__ == '__main__':
     optical_subsubfolder_path = args.folder_optical_flow_path
                     
     #RGB frame detection
+    print("\nAnalyzing RGB frames...")
     original_file_list = sorted(glob.glob(os.path.join(original_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(original_subsubfolder_path, "*.png"))+glob.glob(os.path.join(original_subsubfolder_path, "*.JPEG")))
     original_prob_sum=0
-    for img_path in tqdm(original_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
+    for img_path in tqdm(original_file_list, desc="RGB detection", unit="frame"):
                         
         img = Image.open(img_path).convert("RGB")
         img = trans(img)
@@ -196,12 +219,13 @@ if __name__ == '__main__':
                         
                         
     original_predict=original_prob_sum/len(original_file_list)
-    print("original prob",original_predict)
+    print(f"✓ RGB detection probability: {original_predict:.4f}")
                     
     #optical flow detection
+    print("\nAnalyzing optical flow...")
     optical_file_list = sorted(glob.glob(os.path.join(optical_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(optical_subsubfolder_path, "*.png"))+glob.glob(os.path.join(optical_subsubfolder_path, "*.JPEG")))
     optical_prob_sum=0
-    for img_path in tqdm(optical_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
+    for img_path in tqdm(optical_file_list, desc="Optical flow detection", unit="frame"):
                         
         img = Image.open(img_path).convert("RGB")
         img = trans(img)
@@ -217,11 +241,16 @@ if __name__ == '__main__':
 
                     
     optical_predict=optical_prob_sum/len(optical_file_list)
-    print("optical prob",optical_predict)
+    print(f"✓ Optical flow detection probability: {optical_predict:.4f}")
                     
     predict=original_predict*0.5+optical_predict*0.5
-    print(f"predict:{predict}")
+    print("\n" + "=" * 60)
+    print("RESULTS")
+    print("=" * 60)
+    print(f"Combined probability: {predict:.4f}")
+    print(f"Threshold: {args.threshold}")
     if predict<args.threshold:
-        print("Real video")
+        print("🎬 Result: REAL VIDEO")
     else:
-        print("Fake video")
+        print("🤖 Result: FAKE VIDEO (AI-Generated)")
+    print("=" * 60)

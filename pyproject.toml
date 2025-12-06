@@ -1,0 +1,62 @@
+[project]
+name = "aigvdet"
+version = "0.1.0"
+description = "AI-Generated Video Detection via Spatial-Temporal Anomaly Learning"
+authors = [
+    {name = "Jianfa Bai"},
+    {name = "Man Lin"},
+    {name = "Gang Cao"},
+    {name = "Zijie Lou"}
+]
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+    "torch==2.0.0+cu117",
+    "torchvision==0.15.1+cu117",
+    "einops",
+    "imageio",
+    "ipympl",
+    "matplotlib",
+    "natsort",
+    "numpy<2.0",
+    "opencv-python",
+    "pandas",
+    "scikit-learn",
+    "tensorboard",
+    "tensorboardX",
+    "tqdm",
+    "blobfile>=1.0.5",
+    "wandb",
+    "python-dotenv",
+    "pip",
+]
+
+[project.urls]
+Repository = "https://github.com/sacdalance/AIGVDet"
+
+[project.scripts]
+aigvdet-train = "train:main"
+aigvdet-test = "test:main"
+aigvdet-demo = "demo:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["core"]
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu117"
+
+[dependency-groups]
+dev = [
+    "hatchling",
+    "setuptools",
+    "wheel",
+]

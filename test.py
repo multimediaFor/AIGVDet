@@ -64,6 +64,7 @@ if __name__=="__main__":
     parser.add_argument("--use_cpu", action="store_true", help="uses gpu by default, turn on to use cpu")
     parser.add_argument("--arch", type=str, default="resnet50")
     parser.add_argument("--aug_norm", type=str2bool, default=True)
+    parser.add_argument("--no_crop", action="store_true", help="disable center crop")
 
     args = parser.parse_args()
     subfolder_count = 0
@@ -88,12 +89,19 @@ if __name__=="__main__":
         model_or.cuda()
     
     
-    trans = transforms.Compose(
-        (
-            transforms.CenterCrop((448,448)),
-            transforms.ToTensor(),
+    if args.no_crop:
+        trans = transforms.Compose(
+            (
+                transforms.ToTensor(),
+            )
         )
-    )
+    else:
+        trans = transforms.Compose(
+            (
+                transforms.CenterCrop((448,448)),
+                transforms.ToTensor(),
+            )
+        )
 
     print("*" * 50)
 
@@ -104,6 +112,8 @@ if __name__=="__main__":
     tn=0
     y_true=[]
     y_pred=[]
+    y_pred_original=[]
+    y_pred_optical=[]
 
     # create an empty DataFrame
     df = pd.DataFrame(columns=['name', 'pro','flag','optical_pro','original_pro'])
@@ -130,7 +140,8 @@ if __name__=="__main__":
             print("test subfolder:", subfolder_name)
 
             # Traverse through sub-subfolders within a subfolder.
-            for subsubfolder_name in os.listdir(original_subfolder_path):
+            video_list = os.listdir(original_subfolder_path)
+            for subsubfolder_name in tqdm(video_list, desc=f"Testing {subfolder_name}"):
                 original_subsubfolder_path = os.path.join(original_subfolder_path, subsubfolder_name)
                 optical_subsubfolder_path = os.path.join(optical_subfolder_path, subsubfolder_name)
                 if os.path.isdir(optical_subsubfolder_path):
@@ -145,7 +156,8 @@ if __name__=="__main__":
                     original_file_list = sorted(glob.glob(os.path.join(original_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(original_subsubfolder_path, "*.png"))+glob.glob(os.path.join(original_subsubfolder_path, "*.JPEG")))
 
                     original_prob_sum=0
-                    for img_path in tqdm(original_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
+                    # Inner loop for frames - disable tqdm to avoid nested clutter
+                    for img_path in original_file_list:
                         
                         img = Image.open(img_path).convert("RGB")
                         img = trans(img)
@@ -159,16 +171,17 @@ if __name__=="__main__":
                             prob = model_or(in_tens).sigmoid().item()
                             original_prob_sum+=prob
                             
-                        df1 = df1.append({'original_path': img_path, 'original_pro': prob , 'flag':flag}, ignore_index=True)
+                        df1 = pd.concat([df1, pd.DataFrame([{'original_path': img_path, 'original_pro': prob , 'flag':flag}])], ignore_index=True)
                         
                         
                     original_predict=original_prob_sum/len(original_file_list)
-                    print("original prob",original_predict)
+                    # print("original prob",original_predict)
                     
                     #Detect optical flow
                     optical_file_list = sorted(glob.glob(os.path.join(optical_subsubfolder_path, "*.jpg")) + glob.glob(os.path.join(optical_subsubfolder_path, "*.png"))+glob.glob(os.path.join(optical_subsubfolder_path, "*.JPEG")))
                     optical_prob_sum=0
-                    for img_path in tqdm(optical_file_list, dynamic_ncols=True, disable=len(original_file_list) <= 1):
+                    # Inner loop for frames - disable tqdm
+                    for img_path in optical_file_list:
                         
                         img = Image.open(img_path).convert("RGB")
                         img = trans(img)
@@ -188,13 +201,15 @@ if __name__=="__main__":
                     index1=index1+1
                     
                     optical_predict=optical_prob_sum/len(optical_file_list)
-                    print("optical prob",optical_predict)
+                    # print("optical prob",optical_predict)
                     
                     predict=original_predict*0.5+optical_predict*0.5
-                    print(f"flag:{flag} predict:{predict}")
+                    # print(f"flag:{flag} predict:{predict}")
                     # y_true.append((float)(flag))
                     y_true.append((flag))
                     y_pred.append(predict)
+                    y_pred_original.append(original_predict)
+                    y_pred_optical.append(optical_predict)
                     if flag==0:
                         n+=1
                         if predict<args.threshold:
@@ -203,7 +218,7 @@ if __name__=="__main__":
                         p+=1
                         if predict>=args.threshold:
                             tp+=1
-                    df = df.append({'name': subsubfolder_name, 'pro': predict , 'flag':flag ,'optical_pro':optical_predict,'original_pro':original_predict}, ignore_index=True)
+                    df = pd.concat([df, pd.DataFrame([{'name': subsubfolder_name, 'pro': predict , 'flag':flag ,'optical_pro':optical_predict,'original_pro':original_predict}])], ignore_index=True)
         else:
             print("Subfolder does not exist:", original_subfolder_path)
     # r_acc = accuracy_score(y_true[y_true == 0], y_pred[y_true == 0] > args.threshold)
@@ -212,14 +227,33 @@ if __name__=="__main__":
     
     ap = average_precision_score(y_true, y_pred)
     auc=roc_auc_score(y_true,y_pred)
-    # print(f"r_acc:{r_acc}")
+    acc = accuracy_score(y_true, [1 if p >= args.threshold else 0 for p in y_pred])
+    
+    # Calculate metrics for individual streams
+    acc_original = accuracy_score(y_true, [1 if p >= args.threshold else 0 for p in y_pred_original])
+    auc_original = roc_auc_score(y_true, y_pred_original)
+    
+    acc_optical = accuracy_score(y_true, [1 if p >= args.threshold else 0 for p in y_pred_optical])
+    auc_optical = roc_auc_score(y_true, y_pred_optical)
+
+    print("-" * 30)
+    print("AIGVDet (Fused) Results:")
     print(f"tnr:{tn/n}")
-    # print(f"f_acc:{f_acc}")
     print(f"tpr:{tp/p}")
-    print(f"acc:{(tp+tn)/(p+n)}")
-    # print(f"acc:{acc}")
+    print(f"acc:{acc}")
     print(f"ap:{ap}")
     print(f"auc:{auc}")
+    
+    print("-" * 30)
+    print("Sspatial (Original RGB) Results:")
+    print(f"acc:{acc_original}")
+    print(f"auc:{auc_original}")
+    
+    print("-" * 30)
+    print("Soptical (Optical Flow) Results:")
+    print(f"acc:{acc_optical}")
+    print(f"auc:{auc_optical}")
+    print("-" * 30)
     print(f"p:{p}")
     print(f"n:{n}")
     print(f"tp:{tp}")

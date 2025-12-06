@@ -1,0 +1,75 @@
+# Alternative GPU Dockerfile using PyTorch base image (avoids large download)
+FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_SYSTEM_PYTHON=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libgl1-mesa-glx \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN pip3 install --no-cache-dir uv
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml ./
+COPY README.md ./
+COPY core/ ./core/
+COPY networks/ ./networks/
+COPY .streamlit/ ./.streamlit/
+COPY train.py test.py demo.py download_data.py gui_app.py ./
+
+# Create directories for data and checkpoints
+RUN mkdir -p /app/data /app/checkpoints /app/raft_model 
+
+# Install dependencies (PyTorch already included in base image)
+RUN uv pip install --system \
+    einops \
+    imageio \
+    ipympl \
+    matplotlib \
+    natsort \
+    "numpy<2.0" \
+    opencv-python \
+    pandas \
+    scikit-learn \
+    tensorboard \
+    tensorboardX \
+    tqdm \
+    "blobfile>=1.0.5" \
+    "wandb==0.16.6" \
+    python-dotenv \
+    gdown
+
+# Install pyarrow with a version that has pre-built wheels, then streamlit
+RUN uv pip install --system "pyarrow>=14.0.0,<15.0.0" streamlit
+
+# Install torchvision separately (base image has torch but may need torchvision update)
+RUN pip3 install torchvision==0.15.1+cu117 \
+    --index-url https://download.pytorch.org/whl/cu117 || \
+    pip3 install torchvision==0.15.1
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Expose tensorboard port
+EXPOSE 6006
+
+# Default command
+CMD ["/bin/bash"]

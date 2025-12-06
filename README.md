@@ -1,6 +1,19 @@
 ## AIGVDet
 An official implementation code for paper "AI-Generated Video Detection via Spatial-Temporal Anomaly Learning", PRCV 2024. This repo will provide <B>codes, trained weights, and our training datasets</B>. 
 
+## 🐳 Docker Support
+Now supports Docker with both CPU and GPU versions! See [DOCKER_QUICKREF.md](DOCKER_QUICKREF.md) for quick commands or [DOCKER_USAGE.md](DOCKER_USAGE.md) for detailed instructions.
+
+**Quick Start with Docker:**
+```bash
+# Build and run GPU version
+docker-compose up --build aigvdet-gpu
+
+# Or build manually
+./build-docker.ps1 gpu  # Windows
+./build-docker.sh gpu   # Linux/Mac
+```
+
 ## Network Architecture
 <center> <img src="fig/NetworkArchitecture.png" alt="architecture"/> </center>
 
